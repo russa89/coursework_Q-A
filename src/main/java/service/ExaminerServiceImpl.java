@@ -2,45 +2,46 @@ package service;
 
 import exceptions.TooManyQuestionsException;
 import model.Question;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
 @Service
 public class ExaminerServiceImpl implements ExaminerService {
+    @Qualifier("javaQuestionService")
+    private final QuestionService javaQuestionService;
 
-    private final QuestionService questionService;
-    private final Random random;
+    @Qualifier("mathQuestionService")
+    private final QuestionService mathQuestionService;
+//    private final Random random;
 
-    public ExaminerServiceImpl(QuestionService questionService, Random random) {
-        this.questionService = questionService;
-        this.random = new Random();
+    public ExaminerServiceImpl(QuestionService javaQuestionService, QuestionService mathQuestionService) {
+        this.javaQuestionService = javaQuestionService;
+        this.mathQuestionService = mathQuestionService;
     }
 
     @Override
     public Collection<Question> getQuestions(int amount) {
+        Random random = new Random();
+        Set<Question> questions = new HashSet<>();
 
-        if (questionService.getAll().size() < amount){
+        if (javaQuestionService.getAll().size() +
+                mathQuestionService.getAll().size() > amount) {
             throw new TooManyQuestionsException();
         }
 
-        List<Question> questions = new ArrayList<>();
-
         while (questions.size() < amount) {
-            Question question = questionService.getRandomQuestion();
-            if (!questions.contains(question)) {
-                questions.add(question);
+            if (!javaQuestionService.getAll().isEmpty()) {
+                questions.add(javaQuestionService.getRandomQuestion());
+            } else if (!mathQuestionService.getAll().isEmpty()) {
+                questions.add(mathQuestionService.getRandomQuestion());
+
             }
         }
         return questions;
-
-//        for (int i = 0; i < questions.size(); i++) {
-//            int q = random.nextInt(questions.size());
-//            return (Collection<Question>) questions.toArray()[q];
-//            }
-
-        }
     }
+}
 
 
 

@@ -10,26 +10,29 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ExaminerServiceImplTest {
 
-    @Mock
-    private JavaQuestionService javaQuestionService;
+    JavaQuestionService javaQuestionService = mock(JavaQuestionService.class);
+    MathQuestionService mathQuestionService = mock(MathQuestionService.class);
 
-    @InjectMocks
-    private ExaminerServiceImpl examinerService;
+    ExaminerServiceImpl out = new ExaminerServiceImpl(javaQuestionService, mathQuestionService);
 
-    private final Collection<Question> questions = Set.of(
+    private final List<Question> javaQuestions = List.of(
             new Question("q1", "a1"),
-            new Question("q2", "a2"),
+            new Question("q2", "a2")
+    );
+    private final List<Question> mathQuestions = List.of(
             new Question("q3", "a3"),
             new Question("q4", "a4")
     );
@@ -37,20 +40,15 @@ class ExaminerServiceImplTest {
     @Test
     void getQuestions() {
 
-        when(javaQuestionService.getAll()).thenReturn(questions);
-        when(javaQuestionService.getRandomQuestion()).thenReturn(
-                new Question("q1", "a1"),
-                new Question("q2", "a2"),
-                new Question("q3", "a3")
-        );
-
-        Assertions.assertThat(examinerService.getQuestions(3))
-                .hasSize(3)
-                .containsExactlyInAnyOrder(
-                        new Question("q1", "a1"),
-                        new Question("q3", "a3"),
-                        new Question("q2", "a2")
-                );
-
+        when(javaQuestionService.getRandomQuestion()).thenReturn(javaQuestions.get(0)).
+                thenReturn(javaQuestions.get(1));
+        when(mathQuestionService.getRandomQuestion()).thenReturn(mathQuestions.get(0)).
+                thenReturn(mathQuestions.get(1));
+        when(javaQuestionService.getAll()).thenReturn(javaQuestions);
+        when(mathQuestionService.getAll()).thenReturn(mathQuestions);
+        int expectedAmount = 4;
+        assertEquals(expectedAmount, out.getQuestions(expectedAmount).size());
     }
+
 }
+

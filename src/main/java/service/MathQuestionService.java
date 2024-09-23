@@ -4,78 +4,82 @@ import exceptions.IncorrectQuestionAnswerInput;
 import exceptions.QuestionIsAlreadyAddedException;
 import exceptions.QuestionIsOutException;
 import model.Question;
+import org.springframework.stereotype.Service;
+import repositories.MathQuestionRepository;
+import repositories.QuestionRepository;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Random;
 
-public class MathQuestionService {
+@Service
+public class MathQuestionService implements QuestionService {
 
-    private final QuestionService questionService;
-    private final Random random;
+    private final QuestionRepository repository;
 
-    public MathQuestionService(QuestionService questionService, Random random) {
-        this.questionService = questionService;
-        this.random = random;
+    public MathQuestionService(MathQuestionRepository repository) {
+        this.repository = repository;
     }
+
 
     @Override
     public Question add(String question, String answer) {
 
-        checkQAContent(question, answer);
+        Question newQuestion = new Question(question, answer);
+        checkQAContentForNull(question, answer);
 
-        Question text = new Question(question, answer);
-        questions.add(text);
+        if (repository.getAll().contains(question)) {
+            throw new QuestionIsAlreadyAddedException("Question is already added");
+        }
 
-        return text;
+        return repository.add(newQuestion);
     }
 
-//    @Override
-//    public Question add(Question question) {
-//
-//        if (questions.contains(question)) {
-//            throw new QuestionIsAlreadyAddedException("Question is already added");
-//        }
-//
-//        questions.add(question);
-//        return question;
-//    }
-//
-//    @Override
-//    public Question remove(Question question) {
-//
-//        checkForNull();
-//
-//        questions.remove(question);
-//        return question;
-//    }
-//
-//    @Override
-//    public Collection<Question> getAll() {
-//
-//        checkForNull();
-//        return questions;
-//    }
-//
-//    @Override
-//    public Question getRandomQuestion() {
-//
-//        checkForNull();
-//
-//        Random random = new Random();
-//        int number = random.nextInt(questions.size());
-//
-//        return questions.get(number);
-//    }
-//
-//    private void checkForNull() {
-//        if (questions.isEmpty()) {
-//            throw new QuestionIsOutException("Question is null");
-//        }
-//    }
-//
-//    private void checkQAContent(String question, String answer) {
-//        if (question == null || answer == null || question.equals(answer)) {
-//            throw new IncorrectQuestionAnswerInput();
-//        }
-//    }
+
+    @Override
+    public Question add(Question question) {
+        if (repository.getAll().contains(question)) {
+            throw new QuestionIsAlreadyAddedException("Question is already added");
+        }
+        return repository.add(question);
+    }
+
+
+    @Override
+    public Question remove(Question question) {
+        checkIfQuestionIsNull();
+        if (!repository.getAll().contains(question)) {
+            throw new QuestionIsOutException("Question doesn't exist");
+        }
+        return repository.remove(question);
+    }
+
+    @Override
+    public Collection<Question> getAll() {
+        checkIfQuestionIsNull();
+        return repository.getAll();
+    }
+
+    @Override
+    public Question getRandomQuestion() {
+
+        Random random = new Random();
+        List<Question> questions = (List<Question>) repository.getAll();
+        return questions.get(random.nextInt(questions.size()));
+
+    }
+
+    private void checkIfQuestionIsNull() {
+        List<Question> questions = (List<Question>) repository.getAll();
+
+        if (questions.isEmpty()) {
+            throw new QuestionIsOutException("Question is null");
+        }
+    }
+
+    private void checkQAContentForNull(String question, String answer) {
+        if (question == null || answer == null) {
+            throw new IncorrectQuestionAnswerInput();
+        }
+    }
 }

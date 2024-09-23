@@ -3,15 +3,13 @@ package service;
 import exceptions.QuestionIsAlreadyAddedException;
 import exceptions.QuestionIsOutException;
 import model.Question;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import com.github.javafaker.Faker;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import repositories.JavaQuestionRepository;
+import repositories.MathQuestionRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,14 +21,13 @@ import static org.mockito.Mockito.when;
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 @ExtendWith(MockitoExtension.class)
-class JavaQuestionServiceTest {
-
-    private final List<Question> JAVA_QUESTIONS = List.of(
-            new Question("5", "7"),
-            new Question("6", "8"),
-            new Question("7", "9"));
-    JavaQuestionRepository repository = mock(JavaQuestionRepository.class);
-    JavaQuestionService out = new JavaQuestionService(repository);
+class MathQuestionServiceTest {
+    private final List<Question> MATH_QUESTIONS = List.of(
+            new Question("1", "4"),
+            new Question("2", "5"),
+            new Question("3", "6"));
+    MathQuestionRepository repository = mock(MathQuestionRepository.class);
+    MathQuestionService out = new MathQuestionService(repository);
 
     @Test
     @DisplayName("Должен добавить вопрос/ответ")
@@ -45,8 +42,8 @@ class JavaQuestionServiceTest {
     @DisplayName("Должен выбросить исключение, если вопрос/ответ уже добавлен")
     void shouldThrowAnExceptionWhenQAAlreadyAdded() {
 
-        Question expected = new Question("5", "7");
-        when(repository.getAll()).thenReturn(JAVA_QUESTIONS);
+        Question expected = new Question("1", "4");
+        when(repository.getAll()).thenReturn(MATH_QUESTIONS);
 
         assertThatExceptionOfType(QuestionIsAlreadyAddedException.class).isThrownBy(
                 () -> out.add(expected));
@@ -66,7 +63,7 @@ class JavaQuestionServiceTest {
     @DisplayName("Должен выбросить исключение, если вопрос/ответ не найден")
     void shouldThrowAnException1() {
 
-        when(repository.getAll()).thenReturn(JAVA_QUESTIONS);
+        when(repository.getAll()).thenReturn(MATH_QUESTIONS);
 
         assertThatExceptionOfType(QuestionIsOutException.class).isThrownBy(
                 () -> out.remove(new Question("1", "2")));
@@ -78,7 +75,7 @@ class JavaQuestionServiceTest {
     void shouldThrowAnException2() {
 
         Question expected = new Question(null, "2");
-        when(repository.getAll()).thenReturn(JAVA_QUESTIONS);
+        when(repository.getAll()).thenReturn(MATH_QUESTIONS);
 
         assertThatExceptionOfType(QuestionIsOutException.class).isThrownBy(
                 () -> out.remove(expected));
@@ -89,12 +86,12 @@ class JavaQuestionServiceTest {
     @DisplayName("Получить все вопросы/ответы")
     void getAll() {
 
-        when(repository.getAll()).thenReturn(JAVA_QUESTIONS);
+        when(repository.getAll()).thenReturn(MATH_QUESTIONS);
 
         List<Question> expected = new ArrayList<>(List.of(
-                new Question("5", "7"),
-                new Question("6", "8"),
-                new Question("7", "9")
+                new Question("1", "4"),
+                new Question("2", "5"),
+                new Question("3", "6")
         ));
         assertEquals(repository.getAll(), expected);
     }
@@ -104,7 +101,7 @@ class JavaQuestionServiceTest {
     void getAllNegative() {
 
         Question expected = new Question(null, "2");
-        when(repository.getAll()).thenReturn(JAVA_QUESTIONS);
+        when(repository.getAll()).thenReturn(MATH_QUESTIONS);
 
         assertThatExceptionOfType(QuestionIsOutException.class).isThrownBy(
                 () -> out.remove(expected));
@@ -113,12 +110,12 @@ class JavaQuestionServiceTest {
     @Test
     @DisplayName("Получить рандомные вопросы/ответы")
     void getRandomQuestion() {
-        when(repository.getAll()).thenReturn(JAVA_QUESTIONS);
+        when(repository.getAll()).thenReturn(MATH_QUESTIONS);
         List<Question> questions = (List<Question>) out.getAll();
 
-        Question expected1 = new Question("5", "7");
-        Question expected2 = new Question("6", "8");
-        Question expected3 = new Question("7", "9");
+        Question expected1 = new Question("1", "4");
+        Question expected2 = new Question("2", "5");
+        Question expected3 = new Question("3", "6");
 
         assertEquals(questions.get(0), expected1);
         assertEquals(questions.get(1), expected2);
